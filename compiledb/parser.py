@@ -95,17 +95,20 @@ def parse_build_log(build_log, proj_dir, exclude_files, command_style=False, add
         # Parse directory that make entering/leaving
         enter_dir = make_enter_dir.match(line)
         leave_dir = make_leave_dir.match(line)
-        if (make_enter_dir.match(line)):
+        if (enter_dir):
             working_dir = enter_dir.group('dir')
             dir_stack.append(working_dir)
             continue
-        if (make_leave_dir.match(line)):
+        if (leave_dir):
             leaving_dir = leave_dir.group('dir')
             if working_dir == leaving_dir:
                 dir_stack.pop()
                 working_dir = dir_stack[-1]
             else:
-                dir_stack.remove(leaving_dir)
+                try:
+                    dir_stack.remove(leaving_dir)
+                except ValueError:
+                    pass
             continue
         if (checking_make.match(line)):
             continue
@@ -169,6 +172,8 @@ def parse_build_log(build_log, proj_dir, exclude_files, command_style=False, add
                     'arguments': arguments,
                     'file': filepath,
                 })
+
+    print(f"dir_stack={dir_stack}")
 
     return result
 
